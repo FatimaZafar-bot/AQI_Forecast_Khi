@@ -23,7 +23,6 @@ jobs:
         run: |
           pwd
           ls -R
-          
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -33,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r AQI/aqi_feature_repo/requirements.txt
+          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
 
   data_pipeline:
     name: Run Data Pipeline
@@ -59,19 +58,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r AQI/aqi_feature_repo/requirements.txt
+          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
 
       - name: Run Data Pipeline
-        run: python AQI/aqi_feature_repo/feature_repo/automate_pipeline_khi.py
+        run: python Desktop/AQI/aqi_feature_repo/feature_repo/automate_pipeline_khi.py
 
       - name: Commit updated data & logs & CSVs
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add AQI/aqi_feature_repo/feature_repo/data/khi_air_quality_clean.parquet
-          git add AQI/aqi_feature_repo/feature_repo/data/live_pipeline.log
-          git add AQI/aqi_feature_repo/feature_repo/data/history.csv
-          git add AQI/aqi_feature_repo/feature_repo/data/forecast.csv
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/data/khi_air_quality_clean.parquet
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/data/live_pipeline.log
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update data, logs, and CSVs via GitHub Actions" || echo "No changes to commit"
           git push origin main
 
@@ -99,19 +98,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r AQI/aqi_feature_repo/requirements.txt
+          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
 
       - name: Run Training Pipeline
-        run: python AQI/aqi_feature_repo/feature_repo/model_train/train_pipeline.py
+        run: python Desktop/AQI/aqi_feature_repo/feature_repo/model_train/train_pipeline.py
 
       - name: Commit updated models & CSVs
         run: |
           git lfs install
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add AQI/aqi_feature_repo/feature_repo/model_train/model_registry/*.pkl
-          git add AQI/aqi_feature_repo/feature_repo/data/history.csv
-          git add AQI/aqi_feature_repo/feature_repo/data/forecast.csv
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/model_registry/*.pkl
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
+          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update models and CSVs via GitHub Actions" || echo "No changes to commit"
           git push origin main
 
