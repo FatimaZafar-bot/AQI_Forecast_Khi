@@ -69,8 +69,8 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add AQI/aqi_feature_repo/feature_repo/data/khi_air_quality_clean.parquet
           git add AQI/aqi_feature_repo/feature_repo/data/live_pipeline.log
-          git add AQI/aqi_feature_repo/feature_repo/data/history.csv
-          git add AQI/aqi_feature_repo/feature_repo/data/forecast.csv
+          git add AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
+          git add AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update data, logs, and CSVs via GitHub Actions" || echo "No changes to commit"
           git push origin main
 
@@ -109,8 +109,8 @@ jobs:
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add AQI/aqi_feature_repo/feature_repo/model_train/model_registry/*.pkl
-          git add AQI/aqi_feature_repo/feature_repo/data/history.csv
-          git add AQI/aqi_feature_repo/feature_repo/data/forecast.csv
+          git add AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
+          git add AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update models and CSVs via GitHub Actions" || echo "No changes to commit"
           git push origin main
 
