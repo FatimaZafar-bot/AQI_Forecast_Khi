@@ -73,7 +73,8 @@ jobs:
           git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
           git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update data, logs, and CSVs via GitHub Actions" || echo "No changes to commit"
-          git push origin main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
+          
 
   model_training:
     name: Run Training Pipeline
@@ -114,7 +115,8 @@ jobs:
           git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
           git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
           git commit -m "Update models and CSVs via GitHub Actions" || echo "No changes to commit"
-          git push origin main
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
+
 
   deploy_streamlit:
     name: Deploy Streamlit (Optional/Manual)
