@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
+          pip install -r aqi_feature_repo/requirements.txt
 
   data_pipeline:
     name: Run Data Pipeline
@@ -48,10 +48,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
+          pip install -r aqi_feature_repo/requirements.txt
 
       - name: Run Data Pipeline
-        run: python Desktop/AQI/aqi_feature_repo/feature_repo/automate_pipeline_khi.py
+        run: python aqi_feature_repo/feature_repo/automate_pipeline_khi.py
 
       - name: Commit updated data & logs & CSVs
         run: |
@@ -84,10 +84,10 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/aqi_feature_repo/requirements.txt
+          pip install -r aqi_feature_repo/requirements.txt
 
       - name: Run Training Pipeline
-        run: python Desktop/AQI/aqi_feature_repo/feature_repo/model_train/train_pipeline.py
+        run: python aqi_feature_repo/feature_repo/model_train/train_pipeline.py
 
       - name: Commit updated models & CSVs
         run: |
