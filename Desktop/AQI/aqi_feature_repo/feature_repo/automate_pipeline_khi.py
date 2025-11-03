@@ -1,12 +1,9 @@
-# automate_pipeline_khi.py
 import subprocess
-import time
 import traceback
 import sys
 from datetime import datetime
 import pytz
 
-RUN_INTERVAL_MINUTES = 60   
 FETCH_SCRIPT = "fetch_live_khi.py"
 UPDATE_SCRIPT = "update_feature.py"
 LOG_FILE = "data/live_pipeline.log"
@@ -41,13 +38,10 @@ def run_step(script):
 def main():
     log("🌐 Starting live AQI auto-update pipeline...")
     try:
-        while True:
-            log("============== NEW CYCLE START ==============")
-            run_step(FETCH_SCRIPT)
-            run_step(UPDATE_SCRIPT)
-            log(" Cycle completed successfully.")
-            log(f" Sleeping for {RUN_INTERVAL_MINUTES} minutes...\n")
-            time.sleep(RUN_INTERVAL_MINUTES * 60)
+        log("============== NEW CYCLE START ==============")
+        run_step(FETCH_SCRIPT)
+        run_step(UPDATE_SCRIPT)
+        log(" Cycle completed successfully.")
     except KeyboardInterrupt:
         log("\nPipeline stopped manually by user. Goodbye!")
 
