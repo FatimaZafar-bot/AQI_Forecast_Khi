@@ -1,0 +1,8 @@
+offline_store:
+  type: file
+online_store:
+  path: feature_repo/online_store.db
+  type: sqlite
+project: aqi_feature_repo
+provider: local
+registry: feature_repo/registry.db
