@@ -1,7 +1,4 @@
-- name: List files for debugging
-  run: |
-    pwd
-    ls -R
+
 
 pandas>=2.3.3
 scikit-learn>=1.5.1
