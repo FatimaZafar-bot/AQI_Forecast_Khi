@@ -68,10 +68,10 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/data/khi_air_quality_clean.parquet
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/data/live_pipeline.log
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
+          git add data/khi_air_quality_clean.parquet
+          git add data/live_pipeline.log
+          git add model_train/historical_forecast.csv
+          git add model_train/forecast_next3days_all_models.csv
           git commit -m "Update data, logs, and CSVs via GitHub Actions" || echo "No changes to commit"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
           
