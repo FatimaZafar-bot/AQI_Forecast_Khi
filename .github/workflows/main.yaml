@@ -81,10 +81,9 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with LFS
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          lfs: true
           fetch-depth: 0
 
       - name: List files for debugging
@@ -101,6 +100,16 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r Desktop/AQI/requirements.txt
+          pip install gdown  # for downloading from Google Drive
+
+      - name: Pull Model Registry from Google Drive
+        working-directory: Desktop/AQI/aqi_feature_repo/feature_repo/model_train
+        run: |
+          # Clear local registry first
+          rm -rf model_registry/*
+          mkdir -p model_registry
+          # Download all model files from Google Drive folder
+          gdown --folder https://drive.google.com/drive/folders/1V6ykgrn5S25Yw0yB29-W4CWE2bAqja2_
 
       - name: Run Training Pipeline
         working-directory: Desktop/AQI/aqi_feature_repo/feature_repo
@@ -108,7 +117,6 @@ jobs:
 
       - name: Commit updated models & CSVs
         run: |
-          git lfs install
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/model_registry/*.pkl
@@ -117,7 +125,7 @@ jobs:
           git commit -m "Update models and CSVs via GitHub Actions" || echo "No changes to commit"
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
 
-
+  
   deploy_streamlit:
     name: Deploy Streamlit (Optional/Manual)
     needs: setup
