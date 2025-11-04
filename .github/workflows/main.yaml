@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository with LFS
         uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: false
           fetch-depth: 0
 
       - name: List files for debugging
@@ -42,7 +42,7 @@ jobs:
       - name: Checkout repository with LFS
         uses: actions/checkout@v4
         with:
-          lfs: true
+          lfs: false
           fetch-depth: 0
 
       - name: List files for debugging
