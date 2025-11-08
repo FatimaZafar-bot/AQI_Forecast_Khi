@@ -1,9 +1,11 @@
 # 2 preprocess.py
+
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 import pandas as pd
 import numpy as np
 import os
+from s3_utils import download_from_s3, upload_to_s3
 
 RAW_PATH = "karachi_air_quality.csv"
 PROCESSED_DIR = "data"
@@ -11,6 +13,7 @@ PROCESSED_PATH = os.path.join(PROCESSED_DIR, "khi_air_quality_clean.parquet")
 
 os.makedirs(PROCESSED_DIR, exist_ok=True)
 
+download_from_s3("data/karachi_air_quality.csv", RAW_PATH)
 
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """Clean, preprocess, and engineer features for air quality data.
@@ -121,3 +124,5 @@ if __name__ == "__main__":
 
     processed_df.to_parquet(PROCESSED_PATH, index=False)
     print(f"✅ Saved processed data to: {os.path.abspath(PROCESSED_PATH)}")
+    upload_to_s3(PROCESSED_PATH, "data/khi_air_quality_clean.parquet")
+
