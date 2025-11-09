@@ -1,140 +1,52 @@
-name: AQI Full Automation
+name: AQI Automation
 
 on:
   schedule:
-    # Run data pipeline hourly
+    # Run data pipeline every 1 hour
     - cron: '0 * * * *'
-    # Run training pipeline daily at 2 AM
-    - cron: '0 2 * * *'
-  workflow_dispatch:  # Allows manual trigger
+    # Run training pipeline every day at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
-  setup:
-    name: Setup Python
+  hourly_data_pipeline:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 * * * *'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with LFS
-        uses: actions/checkout@v4
-        with:
-          lfs: false
-          fetch-depth: 0
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: List files for debugging
-        run: |
-          pwd
-          ls -R
-
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.11
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/requirements.txt
+        run: pip install -r Desktop/AQI/requirements.txt
 
-  data_pipeline:
-    name: Run Data Pipeline
-    needs: setup
+
+      - name: Run hourly data pipeline
+        run: |
+          cd Desktop/AQI/aqi_feature_repo/feature_repo
+          python automate_pipeline_khi.py
+
+  daily_train_pipeline:
+    if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository with LFS
-        uses: actions/checkout@v4
-        with:
-          lfs: false
-          fetch-depth: 0
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: List files for debugging
-        run: |
-          pwd
-          ls -R
-
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: 3.11
 
       - name: Install dependencies
+        run: pip install -r Desktop/AQI/requirements.txt
+
+
+      - name: Run train pipeline
         run: |
-          python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/requirements.txt
-
-      - name: Run Data Pipeline
-        working-directory: Desktop/AQI/aqi_feature_repo/feature_repo
-        run: python automate_pipeline_khi.py
-
-      - name: Commit updated data & logs & CSVs
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add data/khi_air_quality_clean.parquet
-          git add data/live_pipeline.log
-          git add model_train/historical_forecast.csv
-          git add model_train/forecast_next3days_all_models.csv
-          git commit -m "Update data, logs, and CSVs via GitHub Actions" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
-          
-
-  model_training:
-    name: Run Training Pipeline
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: List files for debugging
-        run: |
-          pwd
-          ls -R
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r Desktop/AQI/requirements.txt
-          pip install gdown  # for downloading from Google Drive
-
-      - name: Pull Model Registry from Google Drive
-        working-directory: Desktop/AQI/aqi_feature_repo/feature_repo/model_train
-        run: |
-          # Clear local registry first
-          rm -rf model_registry/*
-          mkdir -p model_registry
-          # Download all model files from Google Drive folder
-          gdown --folder https://drive.google.com/drive/folders/1V6ykgrn5S25Yw0yB29-W4CWE2bAqja2_
-
-      - name: Run Training Pipeline
-        working-directory: Desktop/AQI/aqi_feature_repo/feature_repo
-        run: python model_train/train_pipeline.py
-
-      - name: Commit updated models & CSVs
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/model_registry/*.pkl
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/historical_forecast.csv
-          git add Desktop/AQI/aqi_feature_repo/feature_repo/model_train/forecast_next3days_all_models.csv
-          git commit -m "Update models and CSVs via GitHub Actions" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/FatimaZafar-bot/AQI_Forecast_Khi.git HEAD:main
-
-  
-  deploy_streamlit:
-    name: Deploy Streamlit (Optional/Manual)
-    needs: setup
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy Streamlit
-        run: |
-          echo "Streamlit deployment can be triggered manually here."
+          cd Desktop/AQI/aqi_feature_repo/feature_repo/model_train
+          python train_pipeline.py
