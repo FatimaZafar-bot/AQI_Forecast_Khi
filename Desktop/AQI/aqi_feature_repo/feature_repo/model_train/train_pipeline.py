@@ -8,8 +8,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 S3_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
-#LOCAL_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
 
+LOCAL_PARQUET_PATH = os.path.join("data", "khi_air_quality_clean.parquet")
 LAST_RUN_FILE = ".pipeline_last_run"
 TRAIN_MODEL_SCRIPT = "train_model.py"
 FORECAST_SCRIPT = "forecast.py"
