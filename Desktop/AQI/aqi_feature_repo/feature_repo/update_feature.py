@@ -7,22 +7,29 @@ import pandas as pd
 from datetime import timedelta
 from feast import FeatureStore
 from preprocess import preprocess_data 
+from s3_utils import download_from_s3, upload_to_s3
+
 
 PROCESSED_PATH = "data/khi_air_quality_clean.parquet"   
 LIVE_RAW = "data/live_khi_raw.csv"                     
 FEAST_REPO_PATH = "."  
 
 
-if not os.path.exists(LIVE_RAW):
-    raise FileNotFoundError(f"Live raw file not found: {LIVE_RAW}. Run fetch_live_khi.py first.")
+# Download live raw CSV from S3
+download_from_s3("data/live_khi_raw.csv", LIVE_RAW)
 
 live_raw = pd.read_csv(LIVE_RAW)
 print(f"✅ Loaded live raw rows: {len(live_raw)}")
 
-
 live_processed = preprocess_data(live_raw)
 print(f"✅ Live rows after preprocessing: {len(live_processed)}")
 print(live_processed.head().to_string(index=False))
+
+try:
+    download_from_s3("data/khi_air_quality_clean.parquet", PROCESSED_PATH)
+    print(f"✅ Downloaded existing processed parquet from S3: {PROCESSED_PATH}")
+except FileNotFoundError:
+    print("⚠️ No existing processed parquet in S3. Will create a new one.")
 
 
 if os.path.exists(PROCESSED_PATH):
@@ -43,6 +50,9 @@ combined = combined.sort_values("time").drop_duplicates(subset=["time", "city_id
 
 combined.to_parquet(PROCESSED_PATH, index=False)
 print(f"✅ Saved combined processed parquet: {PROCESSED_PATH} (rows: {len(combined)})")
+
+upload_to_s3(PROCESSED_PATH, "data/khi_air_quality_clean.parquet")
+print("✅ Uploaded updated processed parquet to S3")
 
 fs = FeatureStore(repo_path=FEAST_REPO_PATH)
 print("✅ Loaded Feast FeatureStore")
