@@ -5,33 +5,27 @@ import traceback
 from datetime import datetime
 import pytz
 from s3_utils import download_from_s3, upload_to_s3
-import os 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-RAW_DATA_S3 = "data/live_khi_raw.csv"           
-FEATURES_S3 = "data/khi_air_quality_clean.parquet"  
 
+# S3 Paths
+RAW_DATA_S3 = "data/live_khi_raw.csv"
+FEATURES_S3 = "data/khi_air_quality_clean.parquet"
 
+# Scripts
 FETCH_SCRIPT = "fetch_live_khi.py"
 UPDATE_SCRIPT = "update_features.py"
 
-
-LOG_FILE = "data/live_pipeline.log"
-
 def log(msg: str):
-    karachi_tz = pytz.timezone("Asia/Karachi")           
+    """Log messages with timestamp (prints only, no local file)."""
+    karachi_tz = pytz.timezone("Asia/Karachi")
     ts = datetime.now(karachi_tz).strftime("%Y-%m-%d %H:%M:%S %Z")
-    line = f"[{ts}] {msg}"
-    print(line)
-    # Upload log to S3 after every log line
-    with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(line + "\n")
+    print(f"[{ts}] {msg}")
 
 def run_step(script):
     """Run a script as subprocess and log output."""
     log(f" Running {script} ...")
     try:
         result = subprocess.run(
-            [sys.executable, script], 
+            [sys.executable, script],
             capture_output=True,
             text=True,
             check=True
@@ -49,12 +43,13 @@ def main():
     log("🌐 Starting live AQI auto-update pipeline...")
 
     try:
+        # 1️⃣ Fetch latest live data
         run_step(FETCH_SCRIPT)
         upload_to_s3("data/live_khi_raw.csv", RAW_DATA_S3)
         log(f"✅ Uploaded latest live CSV to S3: {RAW_DATA_S3}")
 
+        # 2️⃣ Update features from S3 raw data
         run_step(UPDATE_SCRIPT)
-        
         upload_to_s3("data/khi_air_quality_clean.parquet", FEATURES_S3)
         log(f"✅ Uploaded updated features to S3: {FEATURES_S3}")
 
