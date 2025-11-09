@@ -3,8 +3,15 @@ from feast import FeatureStore, Entity, FeatureView, Field, FileSource
 from feast.types import Float32, Int64, String
 from datetime import timedelta
 import pandas as pd
+from s3_utils import download_from_s3
 
 PARQUET_PATH = "data/khi_air_quality_clean.parquet"
+
+# 🔹 Always download the latest processed data parquet from S3
+print("⬇️ Downloading latest processed parquet from S3...")
+download_from_s3("data/khi_air_quality_clean.parquet", PARQUET_PATH)
+print("✅ Downloaded parquet from S3")
+
 
 city = Entity(name="city", join_keys=["city_id"])
 
