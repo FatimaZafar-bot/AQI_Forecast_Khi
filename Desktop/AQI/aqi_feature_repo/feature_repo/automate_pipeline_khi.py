@@ -5,8 +5,8 @@ import traceback
 from datetime import datetime
 import pytz
 from s3_utils import download_from_s3, upload_to_s3
+import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import os 
 RAW_DATA_S3 = "data/live_khi_raw.csv"
 FEATURES_S3 = "data/khi_air_quality_clean.parquet"
 
