@@ -6,6 +6,7 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta, timezone
 import os
+from s3_utils import upload_to_s3
 
 LAT = 24.8607
 LON = 67.0011
@@ -61,6 +62,10 @@ df = df.sort_values("time").drop_duplicates(subset=["time"], keep="last").reset_
 
 df.to_csv(OUT_RAW, index=False)
 print(f"✅ Saved AQI model data to: {OUT_RAW} ({len(df)} rows)")
+
+upload_to_s3("data/live_khi_raw.csv", "data/live_khi_raw.csv")
+print("✅ Uploaded latest live raw CSV to S3")
+
 
 print("Hourly variables and counts:")
 for k, v in data["hourly"].items():
