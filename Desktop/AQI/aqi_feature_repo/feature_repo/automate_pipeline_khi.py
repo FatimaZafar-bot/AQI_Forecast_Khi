@@ -6,8 +6,8 @@ import pytz
 from s3_utils import download_from_s3, upload_to_s3
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Paths
 RAW_PARQUET_S3 = "data/khi_air_quality_clean.parquet"
