@@ -9,8 +9,8 @@ import os
 from s3_utils import upload_to_s3
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 LAT = 24.8607
 LON = 67.0011
