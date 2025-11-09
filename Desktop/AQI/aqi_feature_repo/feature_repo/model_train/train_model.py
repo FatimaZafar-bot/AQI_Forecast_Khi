@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from datetime import timedelta
-from feature_repo.s3_utils import download_from_s3, upload_to_s3
+from s3_utils import download_from_s3, upload_to_s3
 import sys
 import os
 # Add the parent folder (aqi_feature_repo/) to Python path
