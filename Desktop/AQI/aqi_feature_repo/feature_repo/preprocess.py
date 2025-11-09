@@ -9,8 +9,8 @@ from s3_utils import download_from_s3, upload_to_s3
 import sys
 
 # Add the parent folder (aqi_feature_repo/) to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 RAW_PATH = "karachi_air_quality.csv"
 PROCESSED_DIR = "data"
