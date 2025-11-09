@@ -2,15 +2,14 @@ name: AQI Automation
 
 on:
   schedule:
-    # Run data pipeline every 1 hour
+    # Run data pipeline every hour
     - cron: '0 * * * *'
-    # Run training pipeline every day at midnight UTC
+    # Run training pipeline daily at midnight UTC
     - cron: '0 0 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
   hourly_data_pipeline:
-    if: github.event_name == 'schedule' && github.event.schedule == '0 * * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -23,7 +22,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r Desktop/AQI/requirements.txt
-
 
       - name: Run hourly data pipeline
         run: |
@@ -31,7 +29,6 @@ jobs:
           python automate_pipeline_khi.py
 
   daily_train_pipeline:
-    if: github.event_name == 'schedule' && github.event.schedule == '0 0 * * *'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -45,8 +42,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r Desktop/AQI/requirements.txt
 
-
-      - name: Run train pipeline
+      - name: Run training pipeline
         run: |
           cd Desktop/AQI/aqi_feature_repo/feature_repo/model_train
           python train_pipeline.py
