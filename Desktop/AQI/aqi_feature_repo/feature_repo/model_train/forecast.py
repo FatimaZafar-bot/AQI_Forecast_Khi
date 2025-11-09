@@ -6,11 +6,11 @@ import os
 import subprocess
 import sys
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from s3_utils import download_from_s3, upload_to_s3
+from feature_repo.s3_utils import download_from_s3, upload_to_s3
 import sys
 # Add the parent folder (aqi_feature_repo/) to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(_file_))))
 
 RAW_PARQUET_S3 = "data/khi_air_quality_clean.parquet"
 RAW_PARQUET_LOCAL = "data/khi_air_quality_clean.parquet"
