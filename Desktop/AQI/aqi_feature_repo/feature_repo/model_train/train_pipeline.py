@@ -3,7 +3,7 @@ import subprocess
 import sys
 from datetime import datetime
 import time
-from feature_repo.s3_utils import download_from_s3, upload_to_s3
+from s3_utils import download_from_s3, upload_to_s3
 import sys
 import os
 #sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
