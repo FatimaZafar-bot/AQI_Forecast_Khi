@@ -10,7 +10,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(_file_))))
 
 S3_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
-LOCAL_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
+#LOCAL_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
 
 LAST_RUN_FILE = ".pipeline_last_run"
 TRAIN_MODEL_SCRIPT = "train_model.py"
