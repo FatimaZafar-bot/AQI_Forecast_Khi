@@ -1,10 +1,35 @@
 #forecast_data_save.py 
 import pandas as pd
 import os
+from s3_utils import download_from_s3, upload_to_s3
 
+# ===============================
+# S3 Paths
+# ===============================
 NEW_FORECAST_FILE = "forecast_next3days_all_models.csv"
 HISTORICAL_FILE = "historical_forecast.csv"
 
+S3_FORECAST_NEW = "forecasts/forecast_next3days_all_models.csv"
+S3_FORECAST_HISTORY = "forecasts/historical_forecast.csv"
+
+# Ensure local directory exists
+os.makedirs("forecasts", exist_ok=True)
+
+# ===============================
+# Download the latest S3 files
+# ===============================
+print("\n--- Downloading forecast files from S3 ---")
+download_from_s3(S3_FORECAST_NEW, NEW_FORECAST_FILE)
+
+# Try downloading existing historical file if it exists in S3
+try:
+    download_from_s3(S3_FORECAST_HISTORY, HISTORICAL_FILE)
+except Exception as e:
+    print("No historical forecast file found in S3 (will create a new one).")
+
+# ===============================
+# Original Logic (unchanged)
+# ===============================
 def save_new_forecast():
     """
     Loads the latest 72-hour forecast, merges it with the historical data,
@@ -17,7 +42,6 @@ def save_new_forecast():
         print(f"Loaded new forecast starting at: {df_new_forecast['timestamp'].min()}")
 
     except FileNotFoundError:
-        # Checking forecast.py is made 
         print(f"Error: Could not find {NEW_FORECAST_FILE}. Ensure forecast.py ran correctly.")
         return
     except Exception as e:
@@ -32,8 +56,6 @@ def save_new_forecast():
         print(f"Loaded historical data (Total rows: {len(df_history)})")
         
         new_timestamps = df_new_forecast[~df_new_forecast['timestamp'].isin(df_history['timestamp'])]
-        
-        # Appending only non-overlapping (new) data
         df_combined = pd.concat([df_history, new_timestamps], ignore_index=True)
         
     else:
@@ -41,15 +63,19 @@ def save_new_forecast():
         print("Historical file not found. Creating new history from the latest forecast.")
 
     df_combined = df_combined.sort_values(by='timestamp').reset_index(drop=True)
-
     df_combined.to_csv(HISTORICAL_FILE, index=False)
-    
+
     print("---")
     print(f"Successfully updated {HISTORICAL_FILE}")
     print(f"Total unique forecast points now in history: {len(df_combined)}")
-    added_points = len(df_combined) - len(df_history) if os.path.exists(HISTORICAL_FILE) and not df_history.empty else len(df_combined)
+    added_points = len(df_combined) - len(df_history) if not df_history.empty else len(df_combined)
     print(f"New forecast points added: {added_points}")
 
-
+# ===============================
+# Run and Upload Updated File
+# ===============================
 if __name__ == "__main__":
     save_new_forecast()
+
+    print("\n--- Uploading updated historical forecast to S3 ---")
+    upload_to_s3(HISTORICAL_FILE, S3_FORECAST_HISTORY)
