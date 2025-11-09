@@ -8,6 +8,9 @@ from datetime import timedelta
 from feast import FeatureStore
 from preprocess import preprocess_data 
 from s3_utils import download_from_s3, upload_to_s3
+import sys
+# Add the parent folder (aqi_feature_repo/) to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 PROCESSED_PATH = "data/khi_air_quality_clean.parquet"   
