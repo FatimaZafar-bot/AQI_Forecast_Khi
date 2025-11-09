@@ -12,7 +12,7 @@ FEATURES_S3 = "data/khi_air_quality_clean.parquet"
 
 # Scripts
 FETCH_SCRIPT = "fetch_live_khi.py"
-UPDATE_SCRIPT = "feature_repo/update_feature.py"
+UPDATE_SCRIPT = "update_feature.py"
 
 def log(msg: str):
     """Log messages with timestamp (prints only, no local file)."""
