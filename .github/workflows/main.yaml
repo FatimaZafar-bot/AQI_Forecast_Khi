@@ -25,7 +25,7 @@ jobs:
 
       - name: Run hourly data pipeline
         run: |
-          cd aqi_feature_repo/feature_repo
+          cd Desktop/AQI/aqi_feature_repo/feature_repo
           python -m automate_pipeline_khi.py
 
   daily_train_pipeline:
