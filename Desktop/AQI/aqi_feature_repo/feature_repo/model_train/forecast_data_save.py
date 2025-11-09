@@ -2,7 +2,8 @@ import pandas as pd
 import os
 import sys
 from s3_utils import download_from_s3, upload_to_s3
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(_file_))))
+#sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(_file_))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 NEW_FORECAST_FILE = "forecast_next3days_all_models.csv"
 HISTORICAL_FILE = "historical_forecast.csv"
@@ -69,5 +70,6 @@ if __name__ == "__main__":
 
     print("\n--- Uploading updated historical forecast to S3 ---")
     upload_to_s3(HISTORICAL_FILE, S3_FORECAST_HISTORY)
+
 
 
