@@ -6,16 +6,15 @@ from datetime import datetime
 import pytz
 from s3_utils import download_from_s3, upload_to_s3
 import os 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+RAW_DATA_S3 = "data/live_khi_raw.csv"           
+FEATURES_S3 = "data/khi_air_quality_clean.parquet"  
 
-# S3 Paths
-RAW_DATA_S3 = "data/live_khi_raw.csv"           # Raw live CSV in S3
-FEATURES_S3 = "data/khi_air_quality_clean.parquet"  # Updated feature parquet in S3
 
-# Scripts
 FETCH_SCRIPT = "fetch_live_khi.py"
 UPDATE_SCRIPT = "update_features.py"
 
-# Log
+
 LOG_FILE = "data/live_pipeline.log"
 
 def log(msg: str):
@@ -50,15 +49,12 @@ def main():
     log("🌐 Starting live AQI auto-update pipeline...")
 
     try:
-        # 1️⃣ Fetch latest live data
         run_step(FETCH_SCRIPT)
-        # Upload fresh live CSV to S3
         upload_to_s3("data/live_khi_raw.csv", RAW_DATA_S3)
         log(f"✅ Uploaded latest live CSV to S3: {RAW_DATA_S3}")
 
-        # 2️⃣ Update features from S3 raw data
         run_step(UPDATE_SCRIPT)
-        # Upload updated feature parquet back to S3
+        
         upload_to_s3("data/khi_air_quality_clean.parquet", FEATURES_S3)
         log(f"✅ Uploaded updated features to S3: {FEATURES_S3}")
 
