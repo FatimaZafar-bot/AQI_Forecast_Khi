@@ -8,7 +8,7 @@ s3 = boto3.client(
     region_name=os.getenv("AWS_DEFAULT_REGION", "ap-south-1")
 )
 
-BUCKET_NAME = "aqi-pipeline-bucket"
+BUCKET_NAME = "aqidata11"
 
 def download_from_s3(s3_key, local_path):
     """Download a file from S3 to local path."""
