@@ -1,4 +1,5 @@
 # train_model.py
+
 import pandas as pd
 import numpy as np
 import joblib
@@ -7,44 +8,32 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from datetime import timedelta
 from s3_utils import download_from_s3, upload_to_s3
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import tempfile
 
 def manual_mean_squared_error(y_true, y_pred):
-    """
-    Manually calculates the Mean Squared Error (MSE).
-    """
+    """Manually calculates the Mean Squared Error (MSE)."""
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
     return np.mean((y_true - y_pred) ** 2)
 
-# ==============================
-# 0️⃣ S3 Paths and Local Directories
-# ==============================
-RAW_PARQUET_LOCAL = "data/khi_air_quality_clean.parquet"
-RAW_PARQUET_S3 = "data/khi_air_quality_clean.parquet"  # S3 key
-MODEL_LOCAL = "model_registry"
+
+
+RAW_PARQUET_S3 = "data/khi_air_quality_clean.parquet"
 MODEL_S3_PREFIX = "models/"
 
-os.makedirs("data", exist_ok=True)
-os.makedirs(MODEL_LOCAL, exist_ok=True)
+tmp_dir = tempfile.mkdtemp()
 
-# Download latest parquet from S3
-download_from_s3(RAW_PARQUET_S3, RAW_PARQUET_LOCAL)
+raw_parquet_local = os.path.join(tmp_dir, "khi_air_quality_clean.parquet")
+download_from_s3(RAW_PARQUET_S3, raw_parquet_local)
+
 
 # ==============================
 # 1️⃣ Load Data
 # ==============================
-path = RAW_PARQUET_LOCAL
-df = pd.read_parquet(path)
+df = pd.read_parquet(raw_parquet_local)
 df = df.sort_values("time").reset_index(drop=True)
 
-# ==============================
-# 2️⃣ Create lag and rolling features & SHIFT TARGET
-# ==============================
 df["lag_1"] = df["aqi_estimate"].shift(1)
 df["lag_2"] = df["aqi_estimate"].shift(2)
 df["lag_24"] = df["aqi_estimate"].shift(24)
@@ -63,9 +52,8 @@ df["dayofweek_cos"] = np.cos(2 * np.pi * df["dayofweek"] / 7.0)
 
 df = df.dropna().reset_index(drop=True)
 
-# ==============================
-# 3️⃣ Feature selection
-# ==============================
+
+# Feature selection
 feature_cols = [
     "pm10", "pm2_5", "co", "no2", "so2", "o3",
     "pm2_5_3h_avg", "pm10_3h_avg", "pm2_5_6h_avg", "pm10_6h_avg",
@@ -78,40 +66,24 @@ target_col = f"target_{FORECAST_HORIZON}h"
 X = df[feature_cols]
 y = df[target_col]
 
-# ==============================
-# 4️⃣ Train/test split
-# ==============================
+
 split_idx = int(len(df) * 0.8)
 X_train, X_test = X.iloc[:split_idx], X.iloc[split_idx:]
 y_train, y_test = y.iloc[:split_idx], y.iloc[split_idx:]
 
-# Save train/test splits
-train_test_local = f"{MODEL_LOCAL}/train_test.pkl"
-joblib.dump([X_train, X_test, y_train, y_test], train_test_local)
 
-# ==============================
-# 5️⃣ Scale features
-# ==============================
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 X_test_scaled = scaler.transform(X_test)
 
-# Save scaler
-scaler_local = f"{MODEL_LOCAL}/scaler.pkl"
-joblib.dump(scaler, scaler_local)
 
-# ==============================
-# 6️⃣ Define models
-# ==============================
 models = {
     "RandomForest": RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1),
     "GradientBoosting": GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, random_state=42),
     "LightGBM": LGBMRegressor(n_estimators=200, learning_rate=0.05, random_state=42, n_jobs=-1)
 }
 
-# ==============================
-# 7️⃣ Train models, evaluate, save
-# ==============================
+
 results = {}
 
 for name, model in models.items():
@@ -133,30 +105,31 @@ for name, model in models.items():
     r2 = r2_score(y_test, preds)
 
     results[name] = {"Models": name, "RMSE": rmse, "MAE": mae, "R2": r2}
-    model_file = f"{MODEL_LOCAL}/{name}_model.pkl"
-    joblib.dump(model, model_file)
 
-# Save results
-results_file_local = f"{MODEL_LOCAL}/results.pkl"
-joblib.dump(results, results_file_local)
-pd.DataFrame(results.values()).to_csv(f"{MODEL_LOCAL}/model_results.csv", index=False)
+    # Save model temporarily and upload to S3
+    model_tmp = os.path.join(tmp_dir, f"{name}_model.pkl")
+    joblib.dump(model, model_tmp)
+    upload_to_s3(model_tmp, f"{MODEL_S3_PREFIX}{name}_model.pkl")
 
-print("\nTraining complete. Model performance:")
-for k, v in results.items():
-    print(f"{k}: RMSE={v['RMSE']:.2f}, MAE={v['MAE']:.2f}, R2={v['R2']:.3f}")
 
-# ==============================
-# 8️⃣ Upload all artifacts to S3
-# ==============================
-# Models
-for name in models.keys():
-    upload_to_s3(f"{MODEL_LOCAL}/{name}_model.pkl", f"{MODEL_S3_PREFIX}{name}_model.pkl")
 
-# Scaler
-upload_to_s3(scaler_local, f"{MODEL_S3_PREFIX}scaler.pkl")
+scaler_tmp = os.path.join(tmp_dir, "scaler.pkl")
+joblib.dump(scaler, scaler_tmp)
+upload_to_s3(scaler_tmp, f"{MODEL_S3_PREFIX}scaler.pkl")
 
 # Train/Test split
-upload_to_s3(train_test_local, f"{MODEL_S3_PREFIX}train_test.pkl")
+train_test_tmp = os.path.join(tmp_dir, "train_test.pkl")
+joblib.dump([X_train, X_test, y_train, y_test], train_test_tmp)
+upload_to_s3(train_test_tmp, f"{MODEL_S3_PREFIX}train_test.pkl")
 
-# Results CSV
-upload_to_s3(f"{MODEL_LOCAL}/model_results.csv", f"{MODEL_S3_PREFIX}model_results.csv")
+results_tmp = os.path.join(tmp_dir, "results.pkl")
+joblib.dump(results, results_tmp)
+upload_to_s3(results_tmp, f"{MODEL_S3_PREFIX}results.pkl")
+
+results_csv_tmp = os.path.join(tmp_dir, "model_results.csv")
+pd.DataFrame(results.values()).to_csv(results_csv_tmp, index=False)
+upload_to_s3(results_csv_tmp, f"{MODEL_S3_PREFIX}model_results.csv")
+
+print("\n✅ Training complete. Model performance:")
+for k, v in results.items():
+    print(f"{k}: RMSE={v['RMSE']:.2f}, MAE={v['MAE']:.2f}, R2={v['R2']:.3f}")
