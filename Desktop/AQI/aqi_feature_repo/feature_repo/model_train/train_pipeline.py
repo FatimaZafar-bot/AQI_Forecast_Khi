@@ -4,6 +4,10 @@ import sys
 from datetime import datetime
 import time
 from s3_utils import download_from_s3, upload_to_s3
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 S3_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
 LOCAL_PARQUET_PATH = "data/khi_air_quality_clean.parquet"
