@@ -14,7 +14,10 @@ RAW_PARQUET_S3 = "data/khi_air_quality_clean.parquet"
 
 FETCH_SCRIPT = "fetch_live_khi.py"
 UPDATE_SCRIPT = "update_feature.py"
+
+os.makedirs("data", exist_ok=True)
 LOG_FILE = "data/live_pipeline.log"
+
 
 def log(msg: str):
     karachi_tz = pytz.timezone("Asia/Karachi")           
