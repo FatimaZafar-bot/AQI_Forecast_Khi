@@ -1,3 +1,5 @@
+🌫️ AQI Forecasting System — 3-Day Air Quality Prediction with Automated Data + ML Pipelines
+
 🌫️ Air Quality Index (AQI) Prediction System
 End-to-End Machine Learning Pipeline | Feast Feature Store | S3 Automation | FastAPI + Streamlit
 
